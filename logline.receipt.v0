@@ -1,4 +1,5 @@
 {
+    "id": "hashes.content_hash"
     "receipt_version": "logline.receipt.v0",
     "who": "",
     "did": "",
@@ -9,15 +10,11 @@
     "if_doubt": "",
     "if_not": "",
     "status": "",
-    "result": {},
-    "evidence": {},
-    "transport": {},
     "hashes": {
         "tuple_hash": "",
-        "result_hash": "",
-        "receipt_hash": "",
-        "tuple_hash_profile": "logline-length-prefixed-v0",
-        "json_canonicalization": "jcs-rfc8785",
+        "content_hash": "",
+        "envelope_hash": "",
         "algorithm": "sha256"
+    "json_canonicalization": "jcs-rfc8785",
     }
 }
