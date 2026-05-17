@@ -1,5 +1,5 @@
 {
-    "id": "hashes.content_hash"
+    "id": "hashes.content_hash",
     "receipt_version": "logline.receipt.v0",
     "who": "",
     "did": "",
@@ -15,6 +15,6 @@
         "content_hash": "",
         "envelope_hash": "",
         "algorithm": "sha256"
-    "json_canonicalization": "jcs-rfc8785",
-    }
+    },
+    "json_canonicalization": "jcs-rfc8785"
 }
