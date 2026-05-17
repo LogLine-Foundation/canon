@@ -1,0 +1,327 @@
+# LogLine Canon
+
+Status: normative draft  
+Canon source: `source/logline.canon.json` and `source/logline.canon.logline`
+
+## 1. Scope
+
+This document defines the normative surface of the LogLine canon.
+
+The canon defines the shape, ordering, branch discipline, and minimum
+admissibility rules for LogLine entries. A runtime is an implementation that
+claims adherence to this canon. Runtime behavior is not normative unless it is
+also stated in this document, the grammar, the schema, or the conformance
+corpus.
+
+The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted
+as normative requirement levels.
+
+## 2. Canonical Tuple
+
+A LogLine entry MUST contain exactly these nine positions:
+
+```text
+who
+did
+this
+when
+confirmed_by
+if_ok
+if_doubt
+if_not
+status
+```
+
+No implementation MAY add, remove, reorder, or rename a position while claiming
+conformance to this canon.
+
+The canonical walk order is:
+
+```text
+who -> did -> this -> when -> confirmed_by -> if_ok / if_doubt / if_not -> status
+```
+
+All modes, operations, adapters, SDKs, storage engines, optimizers, and user
+interfaces MUST preserve this nine-position body.
+
+## 3. Position Semantics
+
+### 3.1 `who`
+
+`who` identifies the accountable origin of the entry.
+
+An implementation MUST preserve the raw value of `who`. An implementation MAY
+classify the value as a human, system, runtime, LLM, authority, or domain origin,
+but that classification MUST NOT replace the canonical value.
+
+`who` does not confirm evidence and MUST NOT select a branch.
+
+### 3.2 `did`
+
+`did` names the act, movement, operation, or law expressed by the entry.
+
+An implementation MUST preserve the raw value of `did`. An implementation MAY
+classify verbs into runtime operations, canonical laws, domain acts, or unknown
+acts.
+
+`did` does not execute the act and MUST NOT select a branch.
+
+### 3.3 `this`
+
+`this` names the bounded matter, object, payload, claim, or target.
+
+An implementation MUST preserve the raw value of `this`. A wildcard value `*`
+MAY be used only where canon or conformance material permits a wildcard pattern.
+In operational contexts, unbounded matter SHOULD resolve to doubt unless the
+canon explicitly allows it.
+
+`this` does not fetch external resources and MUST NOT select a branch.
+
+### 3.4 `when`
+
+`when` binds the entry to time, order, phase, sequence, or condition.
+
+An implementation MUST preserve the raw value of `when`. It MAY parse absolute
+timestamps, windows, phases, wildcards, and relative terms. Relative time such as
+`tomorrow` MAY be recognized, but MUST NOT be silently converted into an
+absolute ledger time without explicit context.
+
+`when` does not schedule work and MUST NOT release consequence.
+
+### 3.5 `confirmed_by`
+
+`confirmed_by` is the admissibility pivot.
+
+An implementation MUST preserve the raw value of `confirmed_by`. It MAY resolve
+evidence tokens, receipts, digests, signatures, quorum declarations, or local
+provided evidence.
+
+Only `confirmed_by` may collapse evidential admissibility into:
+
+```text
+ok
+doubt
+not
+```
+
+`confirmed_by = none` MUST NOT be treated as confirmed success by omission. It
+MUST resolve to doubt, rejection, or an explicitly canon-permitted unconfirmed
+state.
+
+Parsing an evidence requirement is not the same as verifying it:
+
+```text
+signature:key_123 parsed != signature verified
+receipt:ev_123 parsed   != receipt trusted
+digest:abc parsed       != digest matched
+quorum:2:ops parsed     != quorum satisfied
+```
+
+An implementation MUST NOT invent proof, fetch remote proof implicitly, or
+fabricate receipts while resolving `confirmed_by`.
+
+### 3.6 `if_ok`
+
+`if_ok` names the governed route when `confirmed_by` resolves ok.
+
+`if_ok` MAY name a release route, continuation, emission, compilation, tower
+release, status commit, or domain route. It MUST NOT prove evidence. It MUST NOT
+execute consequence merely by being selected.
+
+### 3.7 `if_doubt`
+
+`if_doubt` names the governed route when `confirmed_by` resolves doubt or when
+the entry is structurally admissible but not sufficiently resolved.
+
+`if_doubt` MAY name clarification, suspension, ghost handling, return to LogLine,
+halt, or open-state marking. It MUST NOT hide doubt by converting it into ok.
+
+### 3.8 `if_not`
+
+`if_not` names the governed route when the entry is inadmissible, contradicted,
+forbidden, or falsified.
+
+`if_not` MAY name rejection, refusal, denial, rollback label, voiding, failed
+marking, or prohibition. It MUST NOT execute rollback machinery merely by being
+selected.
+
+### 3.9 `status`
+
+`status` records lifecycle truth after the governed walk.
+
+`status` MAY compute lifecycle transitions and MAY expose an append-only ledger
+boundary. It MUST NOT create evidence, execute branch consequence, repair failed
+side effects, or persist global state without an explicit ledger call.
+
+Status closes truth only from walked evidence.
+
+## 4. Textual `.logline` Form
+
+The textual form MUST follow `spec/grammar.ebnf`.
+
+For a normal LogLine entry, the first four positions are positional:
+
+```text
+<who> <did> <this> <when>
+```
+
+The final five positions MUST be introduced by explicit markers:
+
+```text
+confirmed_by <value> if_ok <value> if_doubt <value> if_not <value> status <value>
+```
+
+Therefore the canonical textual shape is:
+
+```text
+who did this when confirmed_by evidence if_ok ok_route if_doubt doubt_route if_not not_route status lifecycle
+```
+
+The `form require` directive is a canon declaration and MUST require the nine
+canonical positions in canonical order.
+
+## 5. JSON Canon Form
+
+The JSON canon artifact MUST validate against `spec/logline-canon.schema.json`.
+
+A canon JSON object MUST include:
+
+```text
+canon
+version
+form
+runtime_walk
+route_kinds
+status_lifecycle
+law
+prohibition
+```
+
+`runtime_walk` MUST contain exactly the nine positions in canonical order.
+
+`law` and `prohibition` entries MUST be represented as nine-field LogLine
+objects.
+
+## 6. Route Classes
+
+The canon defines four route classes:
+
+```text
+ok
+doubt
+not
+none
+```
+
+Each branch position MUST resolve to a route token whose meaning is declared by
+the canon, a domain extension, or an explicit conformance case.
+
+The route classes in the source canon are:
+
+```text
+ok:
+  enter_translation
+  emit_logline
+  enter_strong_grammar
+  emit_ir
+  enter_runtime_walk
+  release_to_tower
+  execute
+  commit_status
+  close
+
+doubt:
+  ask_or_suspend
+  ghost_and_clarify
+  remain_unreleased
+  return_to_logline
+  suspend
+  halt
+  mark_open
+
+not:
+  reject
+  refuse_translation
+  void
+  reject_shape
+  deny
+  do_not_execute
+  rollback
+  mark_failed
+  forbid
+
+none:
+  none
+```
+
+`none` is a route class, not proof. It MUST NOT cause evidence success by
+absence.
+
+## 7. Lifecycle
+
+The lifecycle transitions are:
+
+```text
+draft       -> pending, void
+pending     -> confirmed, doubt, rejected
+doubt       -> pending, rejected, void
+confirmed   -> released, rejected
+released    -> closed, failed, rolled_back
+failed      -> rolled_back, closed
+rolled_back -> closed
+rejected    -> closed
+void        -> closed
+closed      -> []
+```
+
+An implementation MUST reject, doubt, or explicitly classify transitions not
+allowed by the canon version it claims.
+
+`rolled_back` is a lifecycle label. It is not rollback machinery.
+
+## 8. Prohibitions
+
+The canon includes prohibition entries. A prohibition MAY use `*` or the legacy
+time wildcard alias `any_time` as pattern material.
+
+An implementation MUST NOT allow a prohibited entry to release consequence. A
+matching prohibition SHOULD resolve through `if_not` and produce a not branch or
+equivalent rejection report.
+
+The prohibition intent includes:
+
+```text
+natural_language MUST NOT execute before LogLine
+llm MUST NOT become automation by itself
+act MUST NOT bypass LogLine
+act MUST NOT release without confirmation
+```
+
+## 9. Conformance Levels
+
+Implementations MAY declare conformance by level:
+
+```text
+Level 0: Parse textual `.logline`
+Level 1: Validate JSON schema
+Level 2: Apply semantic rules and conformance corpus
+Level 3: Produce and verify receipts
+Level 4: Maintain append-only verifiable ledger
+```
+
+Claims MUST name the canon version and conformance suite version.
+
+## 10. Runtime Boundary
+
+The reference Rust runtime is an implementation. It is not the source of the
+norm.
+
+The authority chain is:
+
+```text
+canon -> conformance corpus -> receipts -> implementation report
+```
+
+The CLI may parse, print, and dispatch. It MUST NOT become a tenth runtime
+field. Any crate, module, or subsystem that participates in the runtime walk
+MUST preserve the nine-position anatomy.

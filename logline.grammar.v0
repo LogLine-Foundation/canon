@@ -1,0 +1,68 @@
+(* LogLine textual grammar.
+
+   This grammar defines the `.logline` surface used by the canon.
+   Whitespace separates tokens. Values are single tokens.
+   Quoted strings and comments are not part of the normative grammar.
+*)
+
+document        = { blank-line | line , line-ending } ;
+
+line            = form-directive
+                | logline-entry ;
+
+form-directive  = "form" , ws , "require" , ws , position-list ;
+
+position-list   = "who" , ws ,
+                  "did" , ws ,
+                  "this" , ws ,
+                  "when" , ws ,
+                  "confirmed_by" , ws ,
+                  "if_ok" , ws ,
+                  "if_doubt" , ws ,
+                  "if_not" , ws ,
+                  "status" ;
+
+logline-entry   = value , ws ,
+                  value , ws ,
+                  value , ws ,
+                  value , ws ,
+                  "confirmed_by" , ws ,
+                  value , ws ,
+                  "if_ok" , ws ,
+                  value , ws ,
+                  "if_doubt" , ws ,
+                  value , ws ,
+                  "if_not" , ws ,
+                  value , ws ,
+                  "status" , ws ,
+                  value ;
+
+value           = token ;
+
+token           = token-char , { token-char } ;
+
+token-char      = ? any non-whitespace Unicode scalar value ? ;
+
+blank-line      = { ws } , line-ending ;
+
+line-ending     = "\n" | "\r\n" ;
+
+ws              = whitespace , { whitespace } ;
+
+whitespace      = " " | "\t" ;
+
+(* Reserved markers.
+   These words introduce fixed positions and MUST NOT be interpreted as ordinary
+   position names at their marker location:
+
+   confirmed_by
+   if_ok
+   if_doubt
+   if_not
+   status
+*)
+
+(* Wildcards.
+   The token "*" is the wildcard token. The token "any_time" is a legacy alias
+   for wildcard time in prohibition material.
+*)
