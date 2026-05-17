@@ -1,0 +1,23 @@
+{
+    "receipt_version": "logline.receipt.v0",
+    "who": "",
+    "did": "",
+    "this": "",
+    "when": "",
+    "confirmed_by": "",
+    "if_ok": "",
+    "if_doubt": "",
+    "if_not": "",
+    "status": "",
+    "result": {},
+    "evidence": {},
+    "transport": {},
+    "hashes": {
+        "tuple_hash": "",
+        "result_hash": "",
+        "receipt_hash": "",
+        "tuple_hash_profile": "logline-length-prefixed-v0",
+        "json_canonicalization": "jcs-rfc8785",
+        "algorithm": "sha256"
+    }
+}
