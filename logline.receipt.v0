@@ -13,7 +13,6 @@
     "hashes": {
         "tuple_hash": "",
         "content_hash": "",
-        "envelope_hash": "",
         "algorithm": "sha256"
     },
     "json_canonicalization": "jcs-rfc8785"
